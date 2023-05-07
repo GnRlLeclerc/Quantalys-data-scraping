@@ -1,8 +1,4 @@
-from api.requests import fast_search, main_page_search
 from api.data import test_agregate_from_isin
-from bs4 import BeautifulSoup
-import httpx
-import json
 import asyncio
 import pandas as pd
 
@@ -10,7 +6,7 @@ from time import time
 
 
 """
-RESTE A FAIRE : 
+RESTE A FAIRE :
 * analyser le secteur et style de gestion
 * voir la zone géo depuis la main page
 * faire la fonction qui génère un excel pour comparer
@@ -29,7 +25,7 @@ A partir de la recherche complète, les attributs qu'on recherche sont les suiva
 
 ce sonts:
 
-* nom du fonds : sNom (remarque : il y a même l'url) 
+* nom du fonds : sNom (remarque : il y a même l'url)
 * rating quantalys : nStarRating
 * note sri  (1 seul r, apparemment): J'AI PAS TROUVE ==================================== requête à faire
 * sharpe ratio : nSharpe3a (1a et 5a sont aussi disponibles)
@@ -63,7 +59,8 @@ Si on rentrait une ligne/ colonne (voir le format du copié collé depuis excel 
 # test_agregate_from_isin(TEST_ISIN)
 # asyncio.run(test_agregate_from_isin("LU1327551674"))
 
-# Pour cette dernière, il y a beaucoup moins de trucs dans la page compositions. Il faudra fallback sur la page principale
+# Pour cette dernière, il y a beaucoup moins de trucs dans la page compositions.
+# Il faudra fallback sur la page principale
 
 ISINs = [
     "LU1670606760",
@@ -204,9 +201,11 @@ ISINs = [
 
 async def main():
     coroutine_list = []
+    queue = asyncio.Queue()  # Wait for coroutine end messages, to display a progress bar
 
     for isin in ISINs:
-        coroutine_list.append(test_agregate_from_isin(isin))
+        coroutine_list.append(asyncio.create_task(
+            test_agregate_from_isin(queue, isin)))
 
     results = await asyncio.gather(*coroutine_list)
 
@@ -225,7 +224,8 @@ end = time() - start
 print(f"Time to run : {end}")
 """
 Ceux là sont not found...
-=> Certains n'en ont pas ! Faire en sorte que ça ne plante pas en faisant de la gestion d;exception aux différents niveaux de fetch
+=> Certains n'en ont pas ! Faire en sorte que ça ne plante pas en faisant de la gestion
+d'exception aux différents niveaux de fetch
 
 error : srri_rating is None 62215
 error : srri_rating is None 2018090

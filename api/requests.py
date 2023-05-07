@@ -1,8 +1,6 @@
 """
 Request functions for the API
 """
-import httpx
-import asyncio
 from httpx import AsyncClient
 from typing import TypedDict, List, Dict
 from api.quantalys import get_main_page_search_data_for_isin
