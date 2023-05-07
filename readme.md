@@ -1,11 +1,15 @@
 # Script de data scraping de données financières
 
+## Reste à faire
+
+-   améliorer le stupende support
+-   améliorer la geo zone
+-   aggréger le secteur d'activité
+-   faire une vraie fonction exécutable, pas juste main actuel
+
 ## Objectif :
 
-Faire une sorte de "macro" qui permettrait de récupérer des informations juste en entrant
-
-Concrètement, le cahier des charges : TODO, et regarder la faisabilité, lui communiquer pour savoir si c'est ce qu'il veut
-Voir le fichier excel attaché
+Faire une sorte de "macro" qui permettrait de récupérer des informations juste en entrant le code ISIN d'un fonds.
 
 À partir du code ISIN d'un fonds, récupérer des données sur Quantalys :
 
@@ -23,4 +27,4 @@ LU1670606760 ABN AMRO Parnassus US ESG Eq R \*\*\* 5 Actions US Tech, Cycliques,
 ## Autres pistes
 
 Idée : utiliser pyinstaller pour le déploiement ?
-=> en vrai, ça serait limite plus pratique de faire un site internet qui fasse ça, pour l'interface ? Mais il faut qu'ils aient node, sinon ?
+Faire une version CLI, on verra si c'est utile pour lui (ça sera bien plus simple pour moi)

@@ -56,12 +56,6 @@ Si on rentrait une ligne/ colonne (voir le format du copié collé depuis excel 
 ça renvoie le csv avec tout
 """
 
-# test_agregate_from_isin(TEST_ISIN)
-# asyncio.run(test_agregate_from_isin("LU1327551674"))
-
-# Pour cette dernière, il y a beaucoup moins de trucs dans la page compositions.
-# Il faudra fallback sur la page principale
-
 ISINs = [
     "LU1670606760",
     "LU1890796300",
@@ -200,10 +194,19 @@ ISINs = [
 
 
 async def main():
+
+    print("Entrez un/des numéros ISIN, séparés par une virgule")
+    print("(Un copié/collé) d'une colonne excel fonctionne bien aussi)")
+    user_input = input()
+
+    start = time()
+
+    isins = user_input if user_input != "test" else ISINs
+
     coroutine_list = []
     queue = asyncio.Queue()  # Wait for coroutine end messages, to display a progress bar
 
-    for isin in ISINs:
+    for isin in isins:
         coroutine_list.append(asyncio.create_task(
             test_agregate_from_isin(queue, isin)))
 
@@ -221,25 +224,9 @@ async def main():
 
     df.to_csv("test.csv")
 
-start = time()
-asyncio.run(main())
-end = time() - start
-print(f"Time to run : {end}")
-"""
-Ceux là sont not found...
-=> Certains n'en ont pas ! Faire en sorte que ça ne plante pas en faisant de la gestion
-d'exception aux différents niveaux de fetch
+    end = time() - start
+    print(f"Time to run : {end}")
 
-error : srri_rating is None 62215
-error : srri_rating is None 2018090
-error : srri_rating is None 781479
-error : srri_rating is None 407574
-error : srri_rating is None 705929
-error : srri_rating is None 767225
-error : srri_rating is None 820805
-error : srri_rating is None 868036
 
-Il y a des trucs à rassifier, on verra ce qu'en dit edouard,
-pour l'instant il faut que je finisse mon info et que je bosse mon psc. (même si j'adore ce genre de projets)
-
-"""
+if __name__ == "__main__":
+    asyncio.run(main())

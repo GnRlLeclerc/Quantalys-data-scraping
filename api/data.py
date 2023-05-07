@@ -51,7 +51,7 @@ async def test_agregate_from_isin(queue: asyncio.Queue, isin: str) -> FundsData:
 
         if len(search_results) == 0:
             await queue.put(isin)  # Communicate to the progress bar
-            return {"empty": True}
+            return {}
 
         data = search_results[0]
 
