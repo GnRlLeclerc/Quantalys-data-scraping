@@ -217,11 +217,7 @@ async def main():
 
     df = pd.DataFrame.from_records(results)
 
-    # df.fillna(0, inplace=True)
-
-    # int_columns = ["quantalys_rating", "srri_rating"]
-    # df[int_columns] = df[int_columns].astype(int)
-
+    # TODO : use date time to produce unique name (when in production, not for testing)
     df.to_csv("test.csv")
 
     end = time() - start

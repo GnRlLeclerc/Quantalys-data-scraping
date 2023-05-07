@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from httpx import AsyncClient
 from typing import List, Dict, TypedDict
 import numpy as np
+import os
 
 
 class FundsData(TypedDict):
@@ -87,18 +88,23 @@ async def test_agregate_from_isin(queue: asyncio.Queue, isin: str) -> FundsData:
 
         return {
             "ISIN": isin,
-            "name": fund_name,
-            "quantalys_rating": quantalys_rating,
-            "srri_rating": srri_rating,
-            "sharpe_ratio": sharpe_ratio_3a,
-            "stupende_support": stupende_support,
-            "geo_zone": geo_zone,
-            "sector_and_style": sector_and_style
+            "Nom du fond": fund_name,
+            "Rating Quantalys": quantalys_rating,
+            "Rating SRRI": srri_rating,
+            "Sharpe Ratio": sharpe_ratio_3a,
+            "Stupende Support": stupende_support,
+            "Zone Géo": geo_zone,
+            "Secteur et Style": sector_and_style
         }
 
 
 def print_progress_bar(count: int, total: int, bar_length: int = 60) -> None:
     """Prints a progress bar in the terminal"""
+    terminal_width = os.get_terminal_size().columns
+
+    if bar_length > terminal_width + 30:
+        bar_length = terminal_width - 30
+
     percent_complete = count / total
     num_bar_filled = int(percent_complete * bar_length)
     num_bar_empty = bar_length - num_bar_filled

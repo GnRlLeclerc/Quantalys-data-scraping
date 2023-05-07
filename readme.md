@@ -5,7 +5,6 @@
 -   améliorer le stupende support
 -   améliorer la geo zone
 -   aggréger le secteur d'activité
--   faire une vraie fonction exécutable, pas juste main actuel
 
 ## Objectif :
 
