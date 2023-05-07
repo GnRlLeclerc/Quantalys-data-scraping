@@ -6,6 +6,17 @@
 -   améliorer la geo zone
 -   aggréger le secteur d'activité
 
+## Compilation en exécutable sur Windows :
+
+Créer un venv 3.11.3
+
+```Windows
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+pyinstaller --onefile --console --name Quantalys-ISIN --icon=quantalys.ico main.py
+```
+
 ## Objectif :
 
 Faire une sorte de "macro" qui permettrait de récupérer des informations juste en entrant le code ISIN d'un fonds.

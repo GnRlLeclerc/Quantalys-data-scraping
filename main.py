@@ -10,9 +10,6 @@ from typing import List
 RESTE A FAIRE :
 * analyser le secteur et style de gestion
 * voir la zone géo depuis la main page
-* faire la fonction qui génère un excel pour comparer
-* faire l'interface graphique
-
 
 A partir de la recherche complète, les attributs qu'on recherche sont les suivants
 

@@ -15,5 +15,5 @@ dist/
 *.csv
 *.xlsx
 
-# Leftovers
-main.spec
+# Pyinstaller side products
+*.spec
