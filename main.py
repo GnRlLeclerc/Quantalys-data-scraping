@@ -1,4 +1,4 @@
-from api.data import test_agregate_from_isin
+from api.data import test_agregate_from_isin, display_progress_bar
 import asyncio
 import pandas as pd
 
@@ -207,7 +207,10 @@ async def main():
         coroutine_list.append(asyncio.create_task(
             test_agregate_from_isin(queue, isin)))
 
-    results = await asyncio.gather(*coroutine_list)
+    coroutine_list.append(asyncio.create_task(
+        display_progress_bar(queue, len(coroutine_list))))
+    # Exclude the progress bar
+    results = (await asyncio.gather(*coroutine_list))[:-1]
 
     df = pd.DataFrame.from_records(results)
 
