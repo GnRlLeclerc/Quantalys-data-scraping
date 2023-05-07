@@ -1,0 +1,16 @@
+# Ignore venv
+venv/
+
+# Ignore pycache
+__pycache__/
+
+# Ignore build & dist
+build/
+dist/
+
+# Ignore Data files
+*.csv
+*.xlsx
+
+# Leftovers
+main.spec
