@@ -3,6 +3,7 @@ import asyncio
 import pandas as pd
 
 from time import time
+from typing import List
 
 
 """
@@ -193,19 +194,38 @@ ISINs = [
 ]
 
 
+def parse_isins() -> List[str]:
+
+    isins = []
+
+    while (user_input := input()) != "":
+
+        if user_input == "test":
+            return ISINs
+
+        isins.append(user_input)
+
+    return isins
+
+
 async def main():
 
-    print("Entrez un/des numéros ISIN, séparés par une virgule")
-    print("(Un copié/collé) d'une colonne excel fonctionne bien aussi)")
-    user_input = input()
+    print("Please enter newline separated ISIN numbers")
+    print('Enter "test" to use a predefined test list of ISINs, enter nothing to quit the program')
+    print("(You may copy/paste a column directly from excel)")
+
+    isins = parse_isins()
+
+    if len(isins) == 0:
+        print("Nothing was done")
+        return
 
     start = time()
-
-    isins = user_input if user_input != "test" else ISINs
 
     coroutine_list = []
     queue = asyncio.Queue()  # Wait for coroutine end messages, to display a progress bar
 
+    print("Creating and launching coroutines (this may take a few seconds)...")
     for isin in isins:
         coroutine_list.append(asyncio.create_task(
             test_agregate_from_isin(queue, isin)))
@@ -221,7 +241,7 @@ async def main():
     df.to_csv("test.csv")
 
     end = time() - start
-    print(f"Time to run : {end}")
+    print(f"Time to run : {end:.2f} seconds")
 
 
 if __name__ == "__main__":
