@@ -5,6 +5,7 @@ from api.requests import main_page_search, fonds_page_from_product_id
 from bs4 import BeautifulSoup
 from httpx import AsyncClient
 from typing import List, Dict, TypedDict
+import numpy as np
 
 
 class FundsData(TypedDict):
@@ -33,58 +34,58 @@ def parse_srri_rating_from_fonds_page(html: str, product_id_debug) -> int:
     srri_rating = soup.find(
         "div", {"class": "indic-srri indic-srri-selected"})
 
-    # BUG : pourquoi c'est none (voir d'où ça vient sur quantalys, si c'est défini, etc...)
+    # It is not defined for some funds
     if srri_rating is None:
-        print("error : srri_rating is None", product_id_debug)
-        return -1
+        return np.nan
 
     return int(srri_rating.text)
 
 
-async def test_agregate_from_isin(isin: str, client: AsyncClient) -> FundsData:
+async def test_agregate_from_isin(isin: str) -> FundsData:
     """Test : agregate all necessary data
-    TODO : ne pas déclarer un client async pour chacune des requêtes
     """
-    search_results: List[Dict[str, str]] = (await main_page_search(isin, client)).json()["data"]
+    async with AsyncClient(timeout=None) as client:
 
-    if len(search_results) == 0:
-        return {"empty": True}
+        search_results: List[Dict[str, str]] = (await main_page_search(isin, client)).json()["data"]
 
-    data = search_results[0]
+        if len(search_results) == 0:
+            return {"empty": True}
 
-    # Extract useful data
-    fund_name = data["sNom"]
-    quantalys_rating = data["nStarRating"]
-    srri_rating = None
-    sharpe_ratio_3a = data["nSharpe3a"]
-    stupende_support = data["sGroupeCat_rng1"]
-    geo_zone = remove_stupende_from_geo_zone(  # BUG : parfois, ce n'est pas défini...
-        stupende_support, data["sGroupeCat_Specific_Dynamic"])
-    sector_and_style = None  # TODO
+        data = search_results[0]
 
-    # Request main page to get the SRRI rating
-    product_id = data["ID_Produit"]
-    fonds_page_html = await fonds_page_from_product_id(product_id, client)
-    srri_rating = parse_srri_rating_from_fonds_page(
-        fonds_page_html.text, product_id)
+        # Extract useful data
+        fund_name = data["sNom"]
+        quantalys_rating = data["nStarRating"]
+        srri_rating = None
+        sharpe_ratio_3a = data["nSharpe3a"]
+        stupende_support = data["sGroupeCat_rng1"]
+        geo_zone = remove_stupende_from_geo_zone(  # BUG : parfois, ce n'est pas défini...
+            stupende_support, data["sGroupeCat_Specific_Dynamic"])
+        sector_and_style = None  # TODO
 
-    # DEBUG : Print all this data
-    # print(f"ISIN : {isin}")
-    # print(f"Fund name : {fund_name}")
-    # print(f"Quantalys rating : {quantalys_rating}")
-    # print(f"SRRI rating : {srri_rating}")
-    # print(f"Sharpe ratio 3a : {sharpe_ratio_3a}")
-    # print(f"Stupende support : {stupende_support}")
-    # print(f"Geo zone : {geo_zone}")
-    # print(f"Sector and style : {sector_and_style}")
+        # Request main page to get the SRRI rating
+        product_id = data["ID_Produit"]
+        fonds_page_html = await fonds_page_from_product_id(product_id, client)
+        srri_rating = parse_srri_rating_from_fonds_page(
+            fonds_page_html.text, product_id)
 
-    return {
-        "ISIN": isin,
-        "name": fund_name,
-        "quantalys_rating": quantalys_rating,
-        "srri_rating": srri_rating,
-        "sharpe_ratio": sharpe_ratio_3a,
-        "stupende_support": stupende_support,
-        "geo_zone": geo_zone,
-        "sector_and_style": sector_and_style
-    }
+        # DEBUG : Print all this data
+        # print(f"ISIN : {isin}")
+        # print(f"Fund name : {fund_name}")
+        # print(f"Quantalys rating : {quantalys_rating}")
+        # print(f"SRRI rating : {srri_rating}")
+        # print(f"Sharpe ratio 3a : {sharpe_ratio_3a}")
+        # print(f"Stupende support : {stupende_support}")
+        # print(f"Geo zone : {geo_zone}")
+        # print(f"Sector and style : {sector_and_style}")
+
+        return {
+            "ISIN": isin,
+            "name": fund_name,
+            "quantalys_rating": quantalys_rating,
+            "srri_rating": srri_rating,
+            "sharpe_ratio": sharpe_ratio_3a,
+            "stupende_support": stupende_support,
+            "geo_zone": geo_zone,
+            "sector_and_style": sector_and_style
+        }

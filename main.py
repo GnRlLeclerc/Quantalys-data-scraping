@@ -203,23 +203,21 @@ ISINs = [
 
 
 async def main():
-    async with httpx.AsyncClient(timeout=None) as client:
+    coroutine_list = []
 
-        coroutine_list = []
+    for isin in ISINs:
+        coroutine_list.append(test_agregate_from_isin(isin))
 
-        for isin in ISINs:
-            coroutine_list.append(test_agregate_from_isin(isin, client))
+    results = await asyncio.gather(*coroutine_list)
 
-        results = await asyncio.gather(*coroutine_list)
+    df = pd.DataFrame.from_records(results)
 
-        df = pd.DataFrame.from_records(results)
+    # df.fillna(0, inplace=True)
 
-        # df.fillna(0, inplace=True)
+    # int_columns = ["quantalys_rating", "srri_rating"]
+    # df[int_columns] = df[int_columns].astype(int)
 
-        # int_columns = ["quantalys_rating", "srri_rating"]
-        # df[int_columns] = df[int_columns].astype(int)
-
-        df.to_csv("test.csv")
+    df.to_csv("test.csv")
 
 start = time()
 asyncio.run(main())
