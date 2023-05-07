@@ -4,10 +4,8 @@ Request functions for the API
 import httpx
 import asyncio
 from httpx import AsyncClient
-from typing import TypedDict, List, Dict, Awaitable
+from typing import TypedDict, List, Dict
 from api.quantalys import get_main_page_search_data_for_isin
-
-# TODO : async requests
 
 
 class FastSearchResult(TypedDict):
@@ -16,7 +14,7 @@ class FastSearchResult(TypedDict):
     ID_Produit: int
 
 
-async def fast_search(isin: str, client: AsyncClient) -> Awaitable[List[FastSearchResult]]:
+async def fast_search(isin: str, client: AsyncClient) -> List[FastSearchResult]:
     """Fast search using an ISIN number"""
 
     url = "https://www.quantalys.com/Recherche/Produits"
@@ -31,7 +29,7 @@ class MainPageResult(TypedDict):
     data: List[Dict[str, str]]
 
 
-async def main_page_search(isin: str, client: AsyncClient) -> Awaitable[MainPageResult]:
+async def main_page_search(isin: str, client: AsyncClient) -> MainPageResult:
     """Main page data search using an ISIN number"""
 
     url = "https://www.quantalys.com/Recherche/Data"
@@ -39,7 +37,7 @@ async def main_page_search(isin: str, client: AsyncClient) -> Awaitable[MainPage
     return await client.post(url, data=get_main_page_search_data_for_isin(isin))
 
 
-async def fonds_page_from_product_id(Product_ID: int, client: AsyncClient) -> Awaitable[str]:
+async def fonds_page_from_product_id(Product_ID: int, client: AsyncClient) -> str:
     """Get the fonds page from the product ID.
     Only way to get the SRRI rating"""
 

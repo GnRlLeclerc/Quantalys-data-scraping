@@ -33,7 +33,8 @@ def parse_srri_rating_from_fonds_page(html: str, product_id_debug) -> int:
     srri_rating = soup.find(
         "div", {"class": "indic-srri indic-srri-selected"})
 
-    if srri_rating is None:  # BUG : pourquoi c'est none
+    # BUG : pourquoi c'est none (voir d'où ça vient sur quantalys, si c'est défini, etc...)
+    if srri_rating is None:
         print("error : srri_rating is None", product_id_debug)
         return -1
 
