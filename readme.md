@@ -3,7 +3,6 @@
 ## Reste à faire
 
 -   améliorer le stupende support
--   améliorer la geo zone
 -   aggréger le secteur d'activité
 
 ## Compilation en exécutable sur Windows :
@@ -24,17 +23,17 @@ Faire une sorte de "macro" qui permettrait de récupérer des informations juste
 À partir du code ISIN d'un fonds, récupérer des données sur Quantalys :
 
 -   Nom du fonds
--   Rating Quantalys (nombre de petites étoiles)
+-   Rating Quantalys (nombre d'étoiles)
 -   Note SRRI (note sur 5)
--   Sharpe ratio jsp??
+-   Sharpe ratio
 -   Stupende support (actions, obligations, multi asset...)
 -   Zone géographique
--   Secteurs et style de gestion (c'est plus subjectif, plus difficile...)
+-   Secteurs et style de gestion (à agréger depuis les autres pages)
 
-Exemple d'une ligne
-LU1670606760 ABN AMRO Parnassus US ESG Eq R \*\*\* 5 Actions US Tech, Cycliques, Value, Large Cap
+## Code :
 
-## Autres pistes
-
-Idée : utiliser pyinstaller pour le déploiement ?
-Faire une version CLI, on verra si c'est utile pour lui (ça sera bien plus simple pour moi)
+-   [`main.py`](/main.py) : script principal, gère l'input utilisateur et le lancement des coroutines
+-   [`api/`](/api/) : contient les fonctions d'interaction avec le site de Quantalys
+    -   [`data.py`](/api/data.py) : contient les fonctions d'agrégation des données à partir des requêtes
+    -   [`quantalys.py`](/quantalys.py) : contient l'API de Quantalys pour les requêtes les plus complexes
+    -   [`requests.py`](/requests.py) : contient les fonctions de requêtes à Quantalys (coroutines asynchrones)
