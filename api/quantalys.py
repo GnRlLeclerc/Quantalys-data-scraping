@@ -2,6 +2,16 @@
 Api for quantalys data
 """
 from typing import Dict
+from enum import Enum
+
+# Quantalys composition page
+
+
+class TypeCompo(Enum):
+    ActiviteGeographique = 1
+    RepartitionSectorielle = 2
+    DecompositionParCapitalisation = 3
+    DecompositionParStyle = 6
 
 
 def get_main_page_search_data_for_isin(isin: str) -> Dict[str, str]:

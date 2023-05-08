@@ -2,7 +2,8 @@
 Module that fetches the required fields using the requests module
 """
 import asyncio
-from api.requests import main_page_search, fonds_page_from_product_id
+from api.quantalys import TypeCompo
+from api.requests import fonds_page_from_product_id, get_composition_table_from_product_id, main_page_search
 from bs4 import BeautifulSoup
 from httpx import AsyncClient
 from typing import List, Dict, TypedDict
@@ -10,6 +11,8 @@ import numpy as np
 import os
 
 LAST_BAR_LENGTH = 0  # Flush the progress bar
+# Minimum percentage to be considered as a significant activity
+GEO_ACTIVITY_THRESHOLD = 25
 
 
 # Defined in priority order. The first match gets returned
@@ -43,6 +46,12 @@ def remove_stupende_from_geo_zone(stupende: str, geo_zone: str) -> str:
 
     if geo_zone[:len(stupende)] == stupende:
         return geo_zone[len(stupende) + 1:]
+
+
+def parse_french_percent(percent_str: str) -> float:
+    if percent_str == "-":
+        return 0
+    return percent_str.replace(",", ".").strip("%")
 
 
 def parse_srri_rating_from_fonds_page(soup: BeautifulSoup) -> int:
@@ -85,6 +94,41 @@ def parse_geo_zone_from_fonds_page(soup: BeautifulSoup) -> str | None:
     return None  # Default : not found
 
 
+async def fonds_composition_page_from_product_id(Product_ID: int, client: AsyncClient):
+    """TODO : parse the composition page. See what can be inferred from the data, etc"""
+
+    # Parse the geographical zone activity. Sort by decreasing percentage, only if >= 25%
+    # Find the Geo activity table
+    # Start with geographical activity
+    geographical_activity = await get_composition_table_from_product_id(Product_ID, TypeCompo.ActiviteGeographique, client)
+
+    data = geographical_activity.json()["graph"]["dataProvider"]
+
+    # Compute mean percentage for each entry
+    geo_percentages = {}
+    for obj in data:
+        for key, value in obj.items():
+            if key != 'x':
+                if key not in geo_percentages:
+                    geo_percentages[key] = value
+                else:
+                    geo_percentages[key] += value
+
+    # Format strings
+    geo_activity_zones = []
+    for key, value in geo_percentages.items():
+        mean_percentage = value / len(data)
+        if mean_percentage >= GEO_ACTIVITY_THRESHOLD:
+            geo_activity_zones.append(
+                # [5:] to remove the "Act. " prefix if it is there
+                f"{key[5:] if len(key) > 7 else key} {mean_percentage:.0f}%")
+
+    # DEBUG: print : FR0013285004 works
+
+    # TODO : in the end, return a formatted string with everything
+    return " ".join(geo_activity_zones)
+
+
 async def agregate_from_isin(queue: asyncio.Queue, isin: str) -> FundsData:
     """Agregate all necessary data
     """
@@ -114,7 +158,6 @@ async def agregate_from_isin(queue: asyncio.Queue, isin: str) -> FundsData:
 
             geo_zone = remove_stupende_from_geo_zone(  # BUG : parfois, ce n'est pas défini...
                 stupende_support, data["sGroupeCat_Specific_Dynamic"])
-            sector_and_style = None  # TODO
 
             # Request main page to get the SRRI rating
             product_id = data["ID_Produit"]
@@ -134,6 +177,9 @@ async def agregate_from_isin(queue: asyncio.Queue, isin: str) -> FundsData:
             precise_geo_zone = parse_geo_zone_from_fonds_page(soup)
             if precise_geo_zone is not None:
                 geo_zone = precise_geo_zone
+
+            # TODO : here
+            sector_and_style = await fonds_composition_page_from_product_id(product_id, client)
 
             #######################################################
             #                    RETURN THE DATA                  #

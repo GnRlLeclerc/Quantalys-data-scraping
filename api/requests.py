@@ -3,7 +3,7 @@ Request functions for the API
 """
 from httpx import AsyncClient
 from typing import TypedDict, List, Dict
-from api.quantalys import get_main_page_search_data_for_isin
+from api.quantalys import TypeCompo, get_main_page_search_data_for_isin
 
 
 class FastSearchResult(TypedDict):
@@ -42,3 +42,11 @@ async def fonds_page_from_product_id(Product_ID: int, client: AsyncClient) -> st
     url = f"https://www.quantalys.com/Fonds/{Product_ID}"
 
     return await client.get(url)
+
+
+async def get_composition_table_from_product_id(Product_ID: int, type_compo: TypeCompo, client: AsyncClient):
+    """Get the fonds Composition tab page from the product ID."""
+
+    url = "https://www.quantalys.com/Fonds/GetCompoTableAndGraph"
+
+    return await client.post(url, data={"ID_Produit": Product_ID, "typeCompo": type_compo.value})
