@@ -117,6 +117,10 @@ async def fonds_composition_page_from_product_id(Product_ID: int, client: AsyncC
 
     fields = []
 
+    #######################################################
+    #               GEOGRAPHICAL ACTIVITY                 #
+    #######################################################
+
     # Parse the geographical zone activity. Sort by decreasing percentage, only if >= 25%
     # Find the Geo activity table
     # Start with geographical activity
@@ -137,6 +141,10 @@ async def fonds_composition_page_from_product_id(Product_ID: int, client: AsyncC
 
     fields.extend(geo_activity_zones)  # Add geo activity zones to the fields
 
+    #######################################################
+    #                 SECTORIAL ACTIVITY                  #
+    #######################################################
+
     # Parse the sectorial activity
     sectorial_activity = await get_composition_table_from_product_id(Product_ID, TypeCompo.RepartitionSectorielle, client)
     secto_data = sectorial_activity.json()["graph"]["dataProvider"]
@@ -149,8 +157,38 @@ async def fonds_composition_page_from_product_id(Product_ID: int, client: AsyncC
         max_sector = max(parsed_secto_data, key=parsed_secto_data.get)
         fields.append(max_sector)
 
+    #######################################################
+    #            CAPITALISATION DECOMPOSITION             #
+    #######################################################
+
+    # Parse the capitalisation decomposition
+    capitalisation_decomposition = await get_composition_table_from_product_id(Product_ID, TypeCompo.DecompositionParCapitalisation, client)
+    capi_data = capitalisation_decomposition.json()["graph"]["dataProvider"]
+
+    parsed_capi_data = compute_mean_values_from_composition_data(capi_data)
+
+    # Format strings : only keep the max
+    if len(parsed_capi_data) > 0:
+        max_cap = max(parsed_capi_data, key=parsed_capi_data.get)
+        fields.append(max_cap)
+
+    #######################################################
+    #                STYLE DECOMPOSITION                  #
+    #######################################################
+
+    # Parse the style decomposition
+    style_decomposition = await get_composition_table_from_product_id(Product_ID, TypeCompo.DecompositionParStyle, client)
+    style_data = style_decomposition.json()["graph"]["dataProvider"]
+
+    parsed_style_data = compute_mean_values_from_composition_data(style_data)
+
+    # Format strings : only keep the max
+    if len(parsed_style_data) > 0:
+        max_style = max(parsed_style_data, key=parsed_style_data.get)
+        fields.append(max_style)
+
     # This is "" if no data was found
-    return " ".join(fields)
+    return ", ".join(fields)
 
 
 async def agregate_from_isin(queue: asyncio.Queue, isin: str) -> FundsData:
