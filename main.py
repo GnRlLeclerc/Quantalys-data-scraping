@@ -222,7 +222,7 @@ async def main():
     coroutine_list = []
     queue = asyncio.Queue()  # Wait for coroutine end messages, to display a progress bar
 
-    print("Creating and launching coroutines (this may take a few seconds)...")
+    print("Creating and launching coroutines (this may take a few seconds)...\n")
     for isin in isins:
         coroutine_list.append(asyncio.create_task(
             test_agregate_from_isin(queue, isin)))
@@ -238,7 +238,8 @@ async def main():
     df.to_csv("test.csv")
 
     end = time() - start
-    print(f"Time to run : {end:.2f} seconds")
+    print(f"\nTime to run : {end:.2f} seconds")
+    input("Press any key to exit\n")
 
 
 if __name__ == "__main__":
