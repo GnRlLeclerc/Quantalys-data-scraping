@@ -54,6 +54,24 @@ def parse_french_percent(percent_str: str) -> float:
     return percent_str.replace(",", ".").strip("%")
 
 
+def compute_mean_values_from_composition_data(data: List[Dict[str, float]]) -> Dict[str, float]:
+
+    percentages = {}
+    for obj in data:
+        for key, value in obj.items():
+            if key != 'x':
+                if key not in percentages:
+                    percentages[key] = value
+                else:
+                    percentages[key] += value
+
+    # Compute mean
+    for key, value in percentages.items():
+        percentages[key] = value / len(data)
+
+    return percentages
+
+
 def parse_srri_rating_from_fonds_page(soup: BeautifulSoup) -> int:
     """Parse the SRRI rating from the fonds page html code using beautifulsoup"""
 
@@ -97,36 +115,42 @@ def parse_geo_zone_from_fonds_page(soup: BeautifulSoup) -> str | None:
 async def fonds_composition_page_from_product_id(Product_ID: int, client: AsyncClient):
     """TODO : parse the composition page. See what can be inferred from the data, etc"""
 
+    fields = []
+
     # Parse the geographical zone activity. Sort by decreasing percentage, only if >= 25%
     # Find the Geo activity table
     # Start with geographical activity
     geographical_activity = await get_composition_table_from_product_id(Product_ID, TypeCompo.ActiviteGeographique, client)
 
-    data = geographical_activity.json()["graph"]["dataProvider"]
+    geo_data = geographical_activity.json()["graph"]["dataProvider"]
 
-    # Compute mean percentage for each entry
-    geo_percentages = {}
-    for obj in data:
-        for key, value in obj.items():
-            if key != 'x':
-                if key not in geo_percentages:
-                    geo_percentages[key] = value
-                else:
-                    geo_percentages[key] += value
+    parsed_geo_data = compute_mean_values_from_composition_data(geo_data)
 
     # Format strings
     geo_activity_zones = []
-    for key, value in geo_percentages.items():
-        mean_percentage = value / len(data)
-        if mean_percentage >= GEO_ACTIVITY_THRESHOLD:
+    for key, value in parsed_geo_data.items():
+
+        if value >= GEO_ACTIVITY_THRESHOLD:
             geo_activity_zones.append(
                 # [5:] to remove the "Act. " prefix if it is there
-                f"{key[5:] if len(key) > 7 else key} {mean_percentage:.0f}%")
+                f"{key[5:] if 'Act. ' == key[:5] else key} {value:.0f}%")
 
-    # DEBUG: print : FR0013285004 works
+    fields.extend(geo_activity_zones)  # Add geo activity zones to the fields
 
-    # TODO : in the end, return a formatted string with everything
-    return " ".join(geo_activity_zones)
+    # Parse the sectorial activity
+    sectorial_activity = await get_composition_table_from_product_id(Product_ID, TypeCompo.RepartitionSectorielle, client)
+    secto_data = sectorial_activity.json()["graph"]["dataProvider"]
+
+    parsed_secto_data = compute_mean_values_from_composition_data(secto_data)
+
+    # Format strings : for this section, only take the max value
+    # Only process further if there is data (ie dict is not empty)
+    if len(parsed_secto_data) > 0:
+        max_sector = max(parsed_secto_data, key=parsed_secto_data.get)
+        fields.append(max_sector)
+
+    # This is "" if no data was found
+    return " ".join(fields)
 
 
 async def agregate_from_isin(queue: asyncio.Queue, isin: str) -> FundsData:
