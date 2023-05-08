@@ -1,4 +1,4 @@
-from api.data import test_agregate_from_isin, display_progress_bar
+from api.data import agregate_from_isin, display_progress_bar
 import asyncio
 import pandas as pd
 import datetime
@@ -187,7 +187,7 @@ async def main():
     print("Creating and launching coroutines (this may take a few seconds)...\n")
     for isin in isins:
         coroutine_list.append(asyncio.create_task(
-            test_agregate_from_isin(queue, isin)))
+            agregate_from_isin(queue, isin)))
 
     coroutine_list.append(asyncio.create_task(
         display_progress_bar(queue, len(coroutine_list))))

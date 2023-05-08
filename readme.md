@@ -7,12 +7,23 @@
 
 ## Compilation en exécutable sur Windows :
 
-Créer un venv 3.11.3
+Créer un venv python (Attention : les dépendances ont été freeze pour la version python `3.11.3`)
 
-```Windows
+```bash
 python -m venv venv
-venv\Scripts\activate
+venv\Scripts\activate # Sur Windows
 pip install -r requirements.txt
+```
+
+Pour lancer le script python :
+
+```
+python main.py
+```
+
+Pour compiler en exécutable :
+
+```
 pyinstaller --onefile --console --name Quantalys-ISIN --icon=quantalys.ico main.py
 ```
 

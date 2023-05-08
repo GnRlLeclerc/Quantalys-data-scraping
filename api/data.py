@@ -85,8 +85,8 @@ def parse_geo_zone_from_fonds_page(soup: BeautifulSoup) -> str | None:
     return None  # Default : not found
 
 
-async def test_agregate_from_isin(queue: asyncio.Queue, isin: str) -> FundsData:
-    """Test : agregate all necessary data
+async def agregate_from_isin(queue: asyncio.Queue, isin: str) -> FundsData:
+    """Agregate all necessary data
     """
     try:
 
