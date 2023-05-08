@@ -1,60 +1,12 @@
 from api.data import test_agregate_from_isin, display_progress_bar
 import asyncio
 import pandas as pd
-
+import datetime
 from time import time
 from typing import List
 
-
-"""
-RESTE A FAIRE :
-* analyser le secteur et style de gestion
-* voir la zone géo depuis la main page
-
-A partir de la recherche complète, les attributs qu'on recherche sont les suivants
-
--   Nom du fonds
--   Rating Quantalys (nombre de petites étoiles)
--   Note SRRI (note sur 5)
--   Sharpe ratio jsp??
--   Stupende support (actions, obligations, multi asset...)
--   Zone géographique
--   Secteurs et style de gestion (c'est plus subjectif, plus difficile...)
-
-ce sonts:
-
-* nom du fonds : sNom (remarque : il y a même l'url)
-* rating quantalys : nStarRating
-* note sri  (1 seul r, apparemment): J'AI PAS TROUVE ==================================== requête à faire
-* sharpe ratio : nSharpe3a (1a et 5a sont aussi disponibles)
-
-Pour le reste : aller voir dans les autres onglets
-
-* stupende support: sGroupeCat_rng1
-* zone géographique : sGroupeCat_Specific_Dynamic (retirer le truc précédent pour ne laisser que le pays)
-
-* secteur et style de gestion ? voir d'après les colonnes existantes
-=> voir où c'est écrit dans quantalys : Composition (voir les requêtes de données)
-
-trouver le srri aussi, il est sur la page
-
-TODO : voir les requêtes plus détaillées faites sur les pages, c'est peut-6etre mieux
-BUG
-BUG
-
-
-=> structure du code pour l'instant : faire des fonctions qui font les requêtes ? Créer un sous dossier api ? tools ?
-
-
-
-TODO : ATTENTION A FAIRE DE LA GESTION D'EXCEPTIONS POUR QUE RIEN NE FOUTE LA MERDE SI ÇA MARCHE PAS
-
-avec pyinstaller, faire une petite fenêtre où on rentre l'isin, et ça crée un csv avec les données.
-Si on rentrait une ligne/ colonne (voir le format du copié collé depuis excel => séparé par un retour à la ligne?),
-ça renvoie le csv avec tout
-"""
-
-ISINs = [
+TEST = False
+TEST_ISINS = [
     "LU1670606760",
     "LU1890796300",
     "FR0013285004",
@@ -192,17 +144,27 @@ ISINs = [
 
 
 def parse_isins() -> List[str]:
+    global TEST
 
     isins = []
 
     while (user_input := input()) != "":
 
         if user_input == "test":
-            return ISINs
+            TEST = True
+            return TEST_ISINS
 
         isins.append(user_input)
 
     return isins
+
+
+def create_unique_filename() -> str:
+    """Create a unique filename using the current date and time"""
+    now = datetime.datetime.now()
+
+    # Create a filename using the current date and time
+    return now.strftime("%d-%m-%Y_%H-%M-%S.csv")
 
 
 async def main():
@@ -234,11 +196,13 @@ async def main():
 
     df = pd.DataFrame.from_records(results)
 
-    # TODO : use date time to produce unique name (when in production, not for testing)
-    df.to_csv("test.csv")
+    # Use unique filename per run with the current date and time
+    filename = "test.csv" if TEST else create_unique_filename()
+    df.to_csv(filename)
 
     end = time() - start
     print(f"\nTime to run : {end:.2f} seconds")
+    print(f"Results saved to {filename}")
     input("Press any key to exit\n")
 
 
