@@ -113,7 +113,7 @@ def parse_geo_zone_from_fonds_page(soup: BeautifulSoup) -> str | None:
 
 
 async def fonds_composition_page_from_product_id(Product_ID: int, client: AsyncClient):
-    """TODO : parse the composition page. See what can be inferred from the data, etc"""
+    """Parse the composition page. See what can be inferred from the data, etc"""
 
     fields = []
 
@@ -207,7 +207,7 @@ async def agregate_from_isin(queue: asyncio.Queue, isin: str) -> FundsData:
                 wipe_progress_bar()
                 print("Could not find ISIN", isin, "on Quantalys")
                 await queue.put(isin)  # Communicate to the progress bar
-                return {}
+                return {"ISIN": isin, }
 
             data = search_results[0]
 
@@ -218,7 +218,7 @@ async def agregate_from_isin(queue: asyncio.Queue, isin: str) -> FundsData:
             sharpe_ratio_3a = data["nSharpe3a"]
             stupende_support = data["sGroupeCat_rng1"]
 
-            geo_zone = remove_stupende_from_geo_zone(  # BUG : parfois, ce n'est pas défini...
+            geo_zone = remove_stupende_from_geo_zone(
                 stupende_support, data["sGroupeCat_Specific_Dynamic"])
 
             # Request main page to get the SRRI rating
@@ -240,7 +240,7 @@ async def agregate_from_isin(queue: asyncio.Queue, isin: str) -> FundsData:
             if precise_geo_zone is not None:
                 geo_zone = precise_geo_zone
 
-            # TODO : here
+            # TODO : here : fallback content ?
             sector_and_style = await fonds_composition_page_from_product_id(product_id, client)
 
             #######################################################
@@ -263,7 +263,7 @@ async def agregate_from_isin(queue: asyncio.Queue, isin: str) -> FundsData:
         wipe_progress_bar()
         print("Error with ISIN : ", isin, ":", e)
         await queue.put(isin)  # Communicate to the progress bar
-        return {}
+        return {"ISIN": isin, }
 
 
 def print_progress_bar(count: int, total: int, bar_length: int = 60) -> None:
