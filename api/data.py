@@ -303,8 +303,8 @@ def print_progress_bar(count: int, total: int, bar_length: int = 60) -> None:
 
     terminal_width = os.get_terminal_size().columns
 
-    if bar_length > terminal_width + 30:
-        bar_length = terminal_width - 30
+    if bar_length > terminal_width + 10:
+        bar_length = terminal_width - 10
 
     percent_complete = count / total
     num_bar_filled = int(percent_complete * bar_length)
