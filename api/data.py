@@ -4,7 +4,7 @@ Module that fetches the required fields using the requests module
 import asyncio
 from api.quantalys import TypeCompo
 from api.requests import fonds_page_from_product_id, get_composition_table_from_product_id, main_page_search
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from httpx import AsyncClient
 from typing import List, Dict, TypedDict
 import numpy as np
@@ -39,6 +39,17 @@ class FundsData(TypedDict):
     stupende_support: str
     geo_zone: str
     sector_and_style: str
+
+
+def find_by_tag_and_text(soup: BeautifulSoup, tag: str, text: str) -> Tag | None:
+    """Helper function : find a tag by its text content"""
+    elements = soup.find_all(tag)
+
+    for element in elements:
+        print(element.text)
+        if element.text == text:
+            return element
+    return None
 
 
 def remove_stupende_from_geo_zone(stupende: str, geo_zone: str) -> str:
@@ -110,6 +121,25 @@ def parse_geo_zone_from_fonds_page(soup: BeautifulSoup) -> str | None:
             return predefined_value
 
     return None  # Default : not found
+
+
+def parse_performances_from_fonds_page(soup: BeautifulSoup) -> Dict[str, str]:
+
+    # Find the 4 of them
+    perfs = ["Perf. 1er janvier", "Perf. 1 an", "Perf. 3 ans", "Perf. 5 ans"]
+    results = {}
+
+    for perf in perfs:
+        # Find the corresponding title element
+        # For some reason they have an extra space
+        title = find_by_tag_and_text(soup, 'td', f" {perf}")
+
+        # Find the next sibling, whose innre text is the data
+        data = title.find_next_sibling("td").text
+
+        results[perf] = data
+
+    return results
 
 
 async def fonds_composition_page_from_product_id(Product_ID: int, client: AsyncClient):
@@ -243,6 +273,8 @@ async def agregate_from_isin(queue: asyncio.Queue, isin: str) -> FundsData:
             # TODO : here : fallback content ?
             sector_and_style = await fonds_composition_page_from_product_id(product_id, client)
 
+            performances = parse_performances_from_fonds_page(soup)
+
             #######################################################
             #                    RETURN THE DATA                  #
             #######################################################
@@ -257,8 +289,8 @@ async def agregate_from_isin(queue: asyncio.Queue, isin: str) -> FundsData:
                 "Sharpe Ratio": sharpe_ratio_3a,
                 "Stupende Support": stupende_support,
                 "Zone Géo": geo_zone,
-                "Secteur et Style": sector_and_style
-            }
+                "Secteur et Style": sector_and_style,
+            } | performances
     except Exception as e:
         wipe_progress_bar()
         print("Error with ISIN : ", isin, ":", e)
