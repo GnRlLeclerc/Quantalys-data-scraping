@@ -46,7 +46,6 @@ def find_by_tag_and_text(soup: BeautifulSoup, tag: str, text: str) -> Tag | None
     elements = soup.find_all(tag)
 
     for element in elements:
-        print(element.text)
         if element.text == text:
             return element
     return None
