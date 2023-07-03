@@ -24,7 +24,7 @@ python main.py
 Pour compiler en exécutable :
 
 ```
-pyinstaller --onefile --console --name Quantalys-ISIN --icon=quantalys.ico main.py
+pyinstaller --onedir --console --name Quantalys-ISIN --icon=quantalys.ico main.py
 ```
 
 ## Objectif :
