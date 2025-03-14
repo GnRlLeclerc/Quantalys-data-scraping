@@ -4,6 +4,9 @@ venv/
 # Ignore pycache
 __pycache__/
 
+# Ignore js dependencies
+node_modules/
+
 # Ignore VSCode local settings
 .vscode/
 
